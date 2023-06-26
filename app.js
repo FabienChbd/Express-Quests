@@ -23,12 +23,22 @@ app.put("/api/movies/:id", validateMovie, movieHandlers.updateMovie);
 app.delete("/api/movies/:id", movieHandlers.deleteMovie);
 
 //Users
-const userList = require("./userList");
-app.get("/api/users", userList.getUsers);
-app.get("/api/users/:id", userList.getUserById);
-app.post("/api/users", hashPassword, validateUser, userList.postUser);
-app.put("/api/users/:id", hashPassword, validateUser, userList.updateUser);
-app.delete("/api/users/:id", userList.deleteUser);
+const userHandlers = require("./userHandlers.js");
+app.get("/api/users", userHandlers.getUsers);
+app.get("/api/users/:id", userHandlers.getUserById);
+app.post("/api/users", hashPassword, validateUser, userHandlers.postUser);
+app.put("/api/users/:id", hashPassword, validateUser, userHandlers.updateUser);
+app.delete("/api/users/:id", userHandlers.deleteUser);
+
+const verifyPassword = (req, res) => {
+  res.send(req.user);
+};
+
+app.post(
+  "/api/login",
+  userHandlers.getUserByEmailWithPasswordAndPassToNext,
+  verifyPassword
+);
 
 app.listen(port, (err) => {
   if (err) {
@@ -37,3 +47,15 @@ app.listen(port, (err) => {
     console.log(`Server is listening on ${port}`);
   }
 });
+
+const isItDwight = (req, res) => {
+  if (
+    req.body.email === "dwight@theoffice.com" &&
+    req.body.passord === "123456"
+  ) {
+    res.send("Credentials are valid");
+  } else {
+    res.sendStatus(401);
+  }
+};
+app.post("/api/login", isItDwight);
